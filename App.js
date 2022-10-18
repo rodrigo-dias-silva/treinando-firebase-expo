@@ -6,29 +6,29 @@ import firebase from './src/firebaseConnection';
 export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [users, setUsers] = useState('')
 
 
-  async function cadastrar() {
-    await firebase.auth().createUserWithEmailAndPassword(email, password)
+  async function logar() {
+    await firebase.auth().signInWithEmailAndPassword(email, password)
       .then((value) => {
-        alert('Usuário criado: ' + value.user.email);
+        alert('Bem vindo ' + value.user.email);
+        setUsers(value.user.email)
       })
       .catch((error) => {
-        if (error.code === 'auth/weak-password') {
-          alert('Sua senha deve ter pelo menos 6 caracteres')
-          return
-        }
-        if (error.code === 'auth/invalid-email') {
-          alert('E-mail inválido')
-          return
-        } else {
-          alert('Ops... Algo deu errado: ' + error)
-          return
-        }
+        alert('Ops... Algo deu errado: ' + error)
+        return
+
       })
 
     setEmail('');
     setPassword('')
+  }
+
+  async function sair() {
+    await firebase.auth().signOut();
+    setUsers('')
+    alert('Você saiu!')
   }
 
 
@@ -38,14 +38,20 @@ export default function App() {
 
       <Text style={styles.text}>E-mail:</Text>
       <TextInput style={styles.textInput} underlineColorAndroid="transparent" onChangeText={(text) => setEmail(text)} value={email} />
-      <Text style={styles.text}>Senha:</Text>
+      <Text style={styles.text}>Password:</Text>
       <TextInput style={styles.textInput} underlineColorAndroid="transparent" onChangeText={(text) => setPassword(text)} value={password} />
 
-      <TouchableOpacity style={styles.btn} onPress={cadastrar}>
-        <Text style={styles.textBtn}>Cadastrar</Text>
+      <TouchableOpacity style={styles.btn} onPress={logar}>
+        <Text style={styles.textBtn}>Login</Text>
       </TouchableOpacity>
 
+      <Text style={styles.text}>{users}</Text>
 
+      {users.length > 0 ? (
+        <TouchableOpacity style={styles.btn} onPress={sair}>
+          <Text style={styles.textBtn}>Logout</Text>
+        </TouchableOpacity>
+      ) : ''}
 
     </View>
   );
@@ -61,8 +67,8 @@ const styles = StyleSheet.create({
   },
   textHeader: {
     color: '#fff',
-    fontSize: 24,
-    marginBottom: 25,
+    fontSize: 25,
+    marginBottom: 35,
     fontWeight: 'bold',
 
   },
